@@ -4,9 +4,8 @@ on:
   workflow_dispatch:
 
 env:
-  DOCKER_REGISTRY_URL: hub.docker.com
-  DOCKER_REGISTRY_NAMESPACE: mkazinauskas
-  DOCKER_REGISTRY_REPOSITORY: github-actions-deployment-pipeline-app
+  DOCKER_REGISTRY_URL: hub.docker.com/mkazinauskas
+  DOCKER_REGISTRY_ARTIFACT: github-actions-deployment-pipeline-app
 
 jobs:
   build-and-publish:
@@ -69,7 +68,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: "${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_REPOSITORY }}:${{ steps.build-timestamp.outputs.time }}"
+          tags: "${{ env.DOCKER_REGISTRY_URL }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ steps.build-timestamp.outputs.time }}"
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
