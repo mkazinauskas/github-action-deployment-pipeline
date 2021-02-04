@@ -30,6 +30,7 @@ jobs:
         run: ./gradlew build -i
 
   deploy-to-test:
+    name: Deploy application to Test environment
     runs-on: ubuntu-latest
     needs: build-and-publish
     steps:
@@ -37,6 +38,7 @@ jobs:
         run: echo "Deploying to test"
 
   deploy-to-stage:
+    name: Deploy application to Stage environment
     runs-on: ubuntu-latest
     needs: deploy-to-test
     steps:
@@ -44,6 +46,7 @@ jobs:
         run: echo "Deploying to stage"
 
   deploy-to-production:
+    name: Deploy application to Production environment
     runs-on: ubuntu-latest
     needs: deploy-to-stage
     steps:
