@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Building PR
+    name: Build PR
     runs-on: ubuntu-latest
     steps:
       - name: Project checkout
