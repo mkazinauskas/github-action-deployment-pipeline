@@ -10,8 +10,8 @@ on:
 
 jobs:
   build:
+    name: Building PR
     runs-on: ubuntu-latest
-
     steps:
       - name: Project checkout
         uses: actions/checkout@v2
