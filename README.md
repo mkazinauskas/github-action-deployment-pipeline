@@ -4,4 +4,4 @@ This example shows how to create github actions deployment pipeline for building
 # Important info
 - The most important part is under `.github/workflows` folder. All steps should be self-explanatory.
 - Please note that deployment pipeline with manual triggers for environments are restricted to open-source and enterprise accounts. Up to date info is here: [https://docs.github.com/en/actions/reference/environments](https://docs.github.com/en/actions/reference/environments)
-
+- All builds include caching of gradle downloaded libraries! So your build will be even faster!
