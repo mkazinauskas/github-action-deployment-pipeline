@@ -52,7 +52,7 @@ jobs:
         uses: docker/login-action@v1
         with:
           registry: ${{ env.DOCKER_REGISTRY_URL }}
-          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          username: ${{ env.DOCKER_REGISTRY_NAMESPACE }}
           password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
 
       - name: Generate image timestamp
