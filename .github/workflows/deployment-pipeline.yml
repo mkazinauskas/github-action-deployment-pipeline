@@ -116,7 +116,7 @@ jobs:
         run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.build_and_publish.outputs.image_version }}"
 
       - name: Check if image exists in registry
-        run: docker image inspect "${{ steps.image_info.outputs.image }}"
+        run: docker pull "${{ steps.image_info.outputs.image }}"
 
       - name: Checkout repo
         uses: actions/checkout@v2
