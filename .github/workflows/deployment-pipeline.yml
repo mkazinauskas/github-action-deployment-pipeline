@@ -9,9 +9,11 @@ env:
   DOCKER_REGISTRY_ARTIFACT: github-actions-deployment-pipeline-app
 
 jobs:
-  build-and-publish:
+  build_and_publish:
     name: Building and publishing artifact
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
+    outputs:
+      image: ${{ steps.image_info.outputs.image }}
     steps:
       - name: Project checkout
         uses: actions/checkout@v2
@@ -62,6 +64,10 @@ jobs:
           timeZone: 2
           format: 'YYYY-MM-DD-HH-mm-ss'
 
+      - name: Generate image name
+        id: image_info
+        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ steps.timestamp_generator.outputs.time }}"
+
       - name: Build docker image
         id: docker_build
         uses: docker/build-push-action@v2
@@ -69,7 +75,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: "${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ steps.timestamp_generator.outputs.time }}"
+          tags: ${{ steps.image_info.outputs.image }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
@@ -78,17 +84,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: "release/${{ steps.timestamp_generator.outputs.time }}"
-          release_name: "Release of `${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ steps.timestamp_generator.outputs.time }}`"
+          tag_name: "release/${{ steps.image_info.outputs.image }}"
+          release_name: "Release of `${{ steps.image_info.outputs.image }}`"
           body: |
             New release of great project!
           draft: false
           prerelease: false
 
-  deploy-to-test:
+      - name: Save tag to outputs
+        id: step1
+        run: echo "::set-output name=test::hello"
+
+  deploy_to_test:
     name: Deploy application to Test environment
-    runs-on: ubuntu-latest
-    needs: build-and-publish
+    runs-on: ubuntu-20.04
+    needs: build_and_publish
+    environment:
+      name: test
+      url: https://github.com/mkazinauskas/github-actions-deployment-pipeline
     steps:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
@@ -98,7 +111,7 @@ jobs:
           password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
 
       - name: Check if image exists in registry
-        run: docker images -q "${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ steps.timestamp_generator.outputs.time }}"
+        run: docker images -q "${{ needs.build_and_publish.outputs.image }}"
 
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -115,10 +128,10 @@ jobs:
       - name: Deploy to test
         run: echo "Deploying to test"
 
-  deploy-to-stage:
+  deploy_to_stage:
     name: Deploy application to Stage environment
-    runs-on: ubuntu-latest
-    needs: deploy-to-test
+    runs-on: ubuntu-20.04
+    needs: deploy_to_test
     environment:
       name: stage
       url: https://github.com/mkazinauskas/github-actions-deployment-pipeline
@@ -126,10 +139,10 @@ jobs:
       - name: Deploy to Stage
         run: echo "Deploying to stage"
 
-  deploy-to-production:
+  deploy_to_production:
     name: Deploy application to Production environment
-    runs-on: ubuntu-latest
-    needs: deploy-to-stage
+    runs-on: ubuntu-20.04
+    needs: deploy_to_stage
     environment:
       name: prod
       url: https://github.com/mkazinauskas/github-actions-deployment-pipeline
