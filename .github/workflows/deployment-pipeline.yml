@@ -69,7 +69,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: "${{ env.DOCKER_REGISTRY_URL }}${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ steps.build-timestamp.outputs.time }}"
+          tags: "${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ steps.build-timestamp.outputs.time }}"
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
