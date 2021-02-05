@@ -56,7 +56,7 @@ jobs:
           password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
 
       - name: Generate image timestamp
-        id: timestamp
+        id: time
         uses: nanzm/get-time-action@v1.1
         with:
           timeZone: 0
@@ -69,7 +69,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: "${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ steps.timestamp.outputs.time }}"
+          tags: "${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ steps.time.outputs.time }}"
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
