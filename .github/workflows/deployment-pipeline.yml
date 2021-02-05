@@ -13,7 +13,6 @@ jobs:
     name: Building and publishing artifact
     runs-on: ubuntu-20.04
     outputs:
-      image: ${{ steps.image_info.outputs.image }}
       image_version: ${{ steps.timestamp_generator.outputs.time }}
     steps:
       - name: Project checkout
