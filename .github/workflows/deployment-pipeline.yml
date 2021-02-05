@@ -113,10 +113,10 @@ jobs:
 
       - name: Generate image name
         id: image_info
-        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.build_and_publish.outputs.image_timestamp }}"
+        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.build_and_publish.outputs.image_version }}"
 
       - name: Check if image exists in registry
-        run: docker images -q "${{ needs.build_and_publish.outputs.image }}"
+        run: docker images -q "${{ steps.image_info.outputs.image }}"
 
       - name: Checkout repo
         uses: actions/checkout@v2
