@@ -73,11 +73,45 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: "release/${{ steps.timestamp_generator.outputs.time }}"
+          release_name: "Release of `${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ steps.timestamp_generator.outputs.time }}`"
+          body: |
+            New release of great project!
+          draft: false
+          prerelease: false
+
   deploy-to-test:
     name: Deploy application to Test environment
     runs-on: ubuntu-latest
     needs: build-and-publish
     steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.DOCKER_REGISTRY_URL }}
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+
+      - name: Check if image exists in registry
+        run: docker images -q "${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ steps.timestamp_generator.outputs.time }}"
+
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'latest' # default is latest stable
+        id: install
+
+      - name: Make .kube directory
+        run: mkdir ~/.kube
+
       - name: Deploy to test
         run: echo "Deploying to test"
 
@@ -86,7 +120,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy-to-test
     environment:
-      name: test
+      name: stage
       url: https://github.com/mkazinauskas/github-actions-deployment-pipeline
     steps:
       - name: Deploy to Stage
@@ -96,6 +130,9 @@ jobs:
     name: Deploy application to Production environment
     runs-on: ubuntu-latest
     needs: deploy-to-stage
+    environment:
+      name: prod
+      url: https://github.com/mkazinauskas/github-actions-deployment-pipeline
     steps:
       - name: Deploy to Production
         run: echo "Deploying to Production"
