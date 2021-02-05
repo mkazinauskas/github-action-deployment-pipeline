@@ -68,7 +68,7 @@ jobs:
         id: image_info
         run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ steps.timestamp_generator.outputs.time }}"
 
-      - name: Build docker image
+      - name: Build and publish docker image
         id: docker_build
         uses: docker/build-push-action@v2
         with:
@@ -84,8 +84,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: "release/${{ steps.image_info.outputs.image }}"
-          release_name: "Release of `${{ steps.image_info.outputs.image }}`"
+          tag_name: "release/${{ steps.timestamp_generator.outputs.time }}"
+          release_name: "Release of `${{ steps.timestamp_generator.outputs.time }}`"
           body: |
             New release of great project!
           draft: false
