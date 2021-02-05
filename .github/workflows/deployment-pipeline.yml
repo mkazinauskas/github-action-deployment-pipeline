@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  DOCKER_REGISTRY_URL: docker.com
+  DOCKER_REGISTRY_URL: index.docker.io
   DOCKER_REGISTRY_NAMESPACE: mkazinauskas
   DOCKER_REGISTRY_ARTIFACT: github-actions-deployment-pipeline-app
 
