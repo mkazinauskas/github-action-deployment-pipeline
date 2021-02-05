@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-20.04
     outputs:
       image: ${{ steps.image_info.outputs.image }}
+      image_version: ${{ steps.timestamp_generator.outputs.time }}
     steps:
       - name: Project checkout
         uses: actions/checkout@v2
@@ -110,6 +111,10 @@ jobs:
           username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
           password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
 
+      - name: Generate image name
+        id: image_info
+        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.build_and_publish.outputs.image_timestamp }}"
+
       - name: Check if image exists in registry
         run: docker images -q "${{ needs.build_and_publish.outputs.image }}"
 
@@ -120,7 +125,6 @@ jobs:
         uses: azure/setup-kubectl@v1
         with:
           version: 'latest' # default is latest stable
-        id: install
 
       - name: Make .kube directory
         run: mkdir ~/.kube
