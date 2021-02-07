@@ -128,8 +128,23 @@ jobs:
       - name: Make .kube directory
         run: mkdir ~/.kube
 
-      - name: Deploy to test
-        run: echo "Deploying to test"
+      - name: Add kubernetes credentials
+        run: echo "${{ secrets.KUBERNETES_CONFIG }}" | base64 --decode > ~/.kube/config
+
+      - name: Prepare deployment file
+        run: |
+          ls -la
+          pwd
+          sed -i 's;{{NAMESPACE}};${{ secrets.NAMESPACE }};g' ".github/workflows/deployments/deployment_template.yaml"
+          sed -i 's;{{IMAGE}};${{ steps.image_info.outputs.image }};g' ".github/workflows/deployments/deployment_template.yaml"
+          cat ".github/workflows/deployments/deployment_template.yaml"
+
+      - name: Deploy new version
+        run: kubectl apply -f ".github/workflows/deployments/deployment_template.yaml"
+
+      - name: Check if deployment successful
+        timeout-minutes: 2
+        run: kubectl -n ${{ secrets.NAMESPACE }} rollout status deployment search-results-to-pdf-app-deployment
 
   deploy_to_stage:
     name: Deploy application to Stage environment

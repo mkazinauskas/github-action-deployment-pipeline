@@ -1,0 +1,23 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-actions-app-deployment
+  namespace: {{NAMESPACE}}
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: github-actions-app
+  template:
+    metadata:
+      labels:
+        app: github-actions-app
+    spec:
+      containers:
+      - name: github-actions-app-container
+        image: {{IMAGE}}
+        ports:
+        - containerPort: 8080
+      imagePullSecrets:
+      - name: registry-secret
