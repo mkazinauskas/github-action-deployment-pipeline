@@ -1,0 +1,80 @@
+name: 'Kuberntes deployment'
+description: 'Creates deployment to kubernetes from parameters'
+
+inputs:
+  registryUrl:
+    required: true
+    description: 'Docker registry URL'
+  username:
+    required: true
+    description: 'Docker login username'
+  password:
+    required: true
+    description: 'Docker login password or token'
+  registryNamespace:
+    required: true
+    description: 'Namespace where to deploy image'
+  artifact:
+    required: true
+    description: 'Docker registry artifact'
+  imageVersion:
+    required: true
+    description: 'Docker image version'
+  kubectlVersion:
+    required: true
+    description: 'Version of kubectl'
+    default: 'latest'
+  kuberntesConfig:
+    required: true
+    description: 'Kubernetes configuration file'
+    default: 'latest'
+
+outputs:
+  dockerImageVersion:
+    description: 'Docker image version'
+    value: ${{ inputs.dockerImageVersion }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Generate image name
+      id: image_info
+      run: echo "::set-output name=image::${{ inputs.registryNamespace }}/${{ inputs.artifact }}:${{ inputs.imageVersion }}"
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        registry: ${{ inputs.registryUrl }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+
+    - name: Check if image exists in registry
+      run: docker pull "${{ steps.image_info.outputs.image }}"
+
+    - name: Checkout repo
+      uses: actions/checkout@v2
+
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v1
+      with:
+        version: ${{ inputs.kubectlVersion }}
+
+    - name: Make .kube directory
+      run: mkdir ~/.kube
+
+    - name: Add kubernetes credentials
+      run: echo "${{ secrets.KUBERNETES_CONFIG }}" | base64 --decode > ~/.kube/config
+
+    - name: Prepare deployment file
+      run: |
+        sed -i 's;{{APP_NAME}};${{ env.KUBERNETES_APP_NAME }};g' ".github/workflows/deployments/deployment_template.yaml"
+        sed -i 's;{{NAMESPACE}};${{ secrets.NAMESPACE }};g' ".github/workflows/deployments/deployment_template.yaml"
+        sed -i 's;{{IMAGE}};${{ steps.image_info.outputs.image }};g' ".github/workflows/deployments/deployment_template.yaml"
+        cat ".github/workflows/deployments/deployment_template.yaml"
+
+    - name: Deploy new version
+      run: kubectl apply -f ".github/workflows/deployments/deployment_template.yaml"
+
+    - name: Check if deployment successful
+      timeout-minutes: 2
+      run: kubectl -n ${{ secrets.NAMESPACE }} rollout status deployment ${{ env.KUBERNETES_APP_NAME }}
