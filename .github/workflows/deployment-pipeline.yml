@@ -2,6 +2,10 @@ name: Deployment pipeline
 
 on:
   workflow_dispatch:
+    checkIfImageExists:
+      description: 'Check if image exists before deploying to test/stage/prod environments'
+      required: true
+      default: true
 
 env:
   DOCKER_REGISTRY_URL: docker.io
@@ -107,18 +111,20 @@ jobs:
       name: test
       url: https://github.com/mkazinauskas/github-actions-deployment-pipeline/test
     steps:
+      - name: Generate image name
+        id: image_info
+        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.build_and_publish.outputs.image_version }}"
+
       - name: Login to Docker Hub
+        if: github.event.inputs.checkIfImageExists
         uses: docker/login-action@v1
         with:
           registry: ${{ env.DOCKER_REGISTRY_URL }}
           username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
           password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
 
-      - name: Generate image name
-        id: image_info
-        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.build_and_publish.outputs.image_version }}"
-
       - name: Check if image exists in registry
+        if: github.event.inputs.checkIfImageExists
         run: docker pull "${{ steps.image_info.outputs.image }}"
 
       - name: Checkout repo
@@ -159,18 +165,20 @@ jobs:
       name: stage
       url: https://github.com/mkazinauskas/github-actions-deployment-pipeline/stage
     steps:
+      - name: Generate image name
+        id: image_info
+        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.deploy_to_test.outputs.image_version }}"
+
       - name: Login to Docker Hub
+        if: github.event.inputs.checkIfImageExists
         uses: docker/login-action@v1
         with:
           registry: ${{ env.DOCKER_REGISTRY_URL }}
           username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
           password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
 
-      - name: Generate image name
-        id: image_info
-        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.deploy_to_test.outputs.image_version }}"
-
       - name: Check if image exists in registry
+        if: github.event.inputs.checkIfImageExists
         run: docker pull "${{ steps.image_info.outputs.image }}"
 
       - name: Checkout repo
@@ -212,18 +220,20 @@ jobs:
       name: prod
       url: https://github.com/mkazinauskas/github-actions-deployment-pipeline/prod
     steps:
+      - name: Generate image name
+        id: image_info
+        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.deploy_to_stage.outputs.image_version }}"
+
       - name: Login to Docker Hub
+        if: github.event.inputs.checkIfImageExists
         uses: docker/login-action@v1
         with:
           registry: ${{ env.DOCKER_REGISTRY_URL }}
           username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
           password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
 
-      - name: Generate image name
-        id: image_info
-        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.deploy_to_stage.outputs.image_version }}"
-
       - name: Check if image exists in registry
+        if: github.event.inputs.checkIfImageExists
         run: docker pull "${{ steps.image_info.outputs.image }}"
 
       - name: Checkout repo
