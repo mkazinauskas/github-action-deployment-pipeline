@@ -101,6 +101,8 @@ jobs:
     name: Deploy application to Test environment
     runs-on: ubuntu-20.04
     needs: build_and_publish
+    outputs:
+      image_version: ${{ needs.build_and_publish.outputs.image_version }}
     environment:
       name: test
       url: https://github.com/mkazinauskas/github-actions-deployment-pipeline/test
@@ -151,6 +153,8 @@ jobs:
     name: Deploy application to Stage environment
     runs-on: ubuntu-20.04
     needs: deploy_to_test
+    outputs:
+      image_version: ${{ needs.deploy_to_test.outputs.image_version }}
     environment:
       name: stage
       url: https://github.com/mkazinauskas/github-actions-deployment-pipeline/stage
@@ -164,7 +168,7 @@ jobs:
 
       - name: Generate image name
         id: image_info
-        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.build_and_publish.outputs.image_version }}"
+        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.deploy_to_test.outputs.image_version }}"
 
       - name: Check if image exists in registry
         run: docker pull "${{ steps.image_info.outputs.image }}"
@@ -202,6 +206,8 @@ jobs:
     name: Deploy application to Production environment
     runs-on: ubuntu-20.04
     needs: deploy_to_stage
+    outputs:
+      image_version: ${{ needs.deploy_to_stage.outputs.image_version }}
     environment:
       name: prod
       url: https://github.com/mkazinauskas/github-actions-deployment-pipeline/prod
@@ -215,7 +221,7 @@ jobs:
 
       - name: Generate image name
         id: image_info
-        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.build_and_publish.outputs.image_version }}"
+        run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.deploy_to_stage.outputs.image_version }}"
 
       - name: Check if image exists in registry
         run: docker pull "${{ steps.image_info.outputs.image }}"
