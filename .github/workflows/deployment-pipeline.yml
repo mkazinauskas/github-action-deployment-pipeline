@@ -9,7 +9,6 @@ env:
   DOCKER_REGISTRY_ARTIFACT: github-actions-deployment-pipeline-app
   KUBERNETES_VERSION: 'latest' # default is latest stable
   KUBERNETES_DEPLOYMENT_NAME: github-actions-app-deployment
-  CHECK_IF_IMAGE_EXISTS_BEFORE_DEPLOYMENT: false
 
 jobs:
   build_and_publish:
@@ -113,7 +112,6 @@ jobs:
         run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.build_and_publish.outputs.image_version }}"
 
       - name: Login to Docker Hub
-        if: env.CHECK_IF_IMAGE_EXISTS_BEFORE_DEPLOYMENT
         uses: docker/login-action@v1
         with:
           registry: ${{ env.DOCKER_REGISTRY_URL }}
@@ -121,7 +119,6 @@ jobs:
           password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
 
       - name: Check if image exists in registry
-        if: env.CHECK_IF_IMAGE_EXISTS_BEFORE_DEPLOYMENT
         run: docker pull "${{ steps.image_info.outputs.image }}"
 
       - name: Checkout repo
@@ -167,7 +164,6 @@ jobs:
         run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.deploy_to_test.outputs.image_version }}"
 
       - name: Login to Docker Hub
-        if: env.CHECK_IF_IMAGE_EXISTS_BEFORE_DEPLOYMENT
         uses: docker/login-action@v1
         with:
           registry: ${{ env.DOCKER_REGISTRY_URL }}
@@ -175,7 +171,6 @@ jobs:
           password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
 
       - name: Check if image exists in registry
-        if: env.CHECK_IF_IMAGE_EXISTS_BEFORE_DEPLOYMENT
         run: docker pull "${{ steps.image_info.outputs.image }}"
 
       - name: Checkout repo
@@ -211,8 +206,6 @@ jobs:
     name: Deploy application to Production environment
     runs-on: ubuntu-20.04
     needs: deploy_to_stage
-    outputs:
-      image_version: ${{ needs.deploy_to_stage.outputs.image_version }}
     environment:
       name: prod
       url: https://github.com/mkazinauskas/github-actions-deployment-pipeline/prod
@@ -222,7 +215,6 @@ jobs:
         run: echo "::set-output name=image::${{ env.DOCKER_REGISTRY_NAMESPACE }}/${{ env.DOCKER_REGISTRY_ARTIFACT }}:${{ needs.deploy_to_stage.outputs.image_version }}"
 
       - name: Login to Docker Hub
-        if: env.CHECK_IF_IMAGE_EXISTS_BEFORE_DEPLOYMENT
         uses: docker/login-action@v1
         with:
           registry: ${{ env.DOCKER_REGISTRY_URL }}
@@ -230,7 +222,6 @@ jobs:
           password: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
 
       - name: Check if image exists in registry
-        if: env.CHECK_IF_IMAGE_EXISTS_BEFORE_DEPLOYMENT
         run: docker pull "${{ steps.image_info.outputs.image }}"
 
       - name: Checkout repo
