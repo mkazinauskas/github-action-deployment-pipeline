@@ -2,20 +2,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{DEPLOYMENT_NAME}}}
+  name: {{DEPLOYMENT_NAME}}-deployment
   namespace: {{NAMESPACE}}
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: github-actions-app
+      app: {{DEPLOYMENT_NAME}}-app
   template:
     metadata:
       labels:
-        app: github-actions-app
+        app: {{DEPLOYMENT_NAME}}-app
     spec:
       containers:
-      - name: github-actions-app-container
+      - name: {{DEPLOYMENT_NAME}}-app-container
         image: {{IMAGE}}
         ports:
         - containerPort: 8080
