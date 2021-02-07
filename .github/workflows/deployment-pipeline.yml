@@ -9,7 +9,7 @@ env:
   DOCKER_REGISTRY_ARTIFACT: github-actions-deployment-pipeline-app
   KUBERNETES_VERSION: 'latest' # default is latest stable
   KUBERNETES_DEPLOYMENT_NAME: github-actions-app-deployment
-  CHECK_IF_IMAGE_EXISTS_BEFORE_DEPLOYMENT: true
+  CHECK_IF_IMAGE_EXISTS_BEFORE_DEPLOYMENT: false
 
 jobs:
   build_and_publish:
