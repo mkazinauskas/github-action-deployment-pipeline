@@ -28,6 +28,14 @@ inputs:
     required: true
     description: 'Kubernetes configuration file'
     default: 'latest'
+  kuberntesNamespace:
+    required: true
+    description: 'Kubernetes namespace for deployment'
+    default: 'latest'
+  kubernetesAppName:
+    required: true
+    description: 'Kubernetes app name'
+    default: 'latest'
 
 outputs:
   dockerImageVersion:
@@ -63,12 +71,12 @@ runs:
       run: mkdir ~/.kube
 
     - name: Add kubernetes credentials
-      run: echo "${{ secrets.KUBERNETES_CONFIG }}" | base64 --decode > ~/.kube/config
+      run: echo "${{ inputs.kuberntesConfig }}" | base64 --decode > ~/.kube/config
 
     - name: Prepare deployment file
       run: |
-        sed -i 's;{{APP_NAME}};${{ env.KUBERNETES_APP_NAME }};g' ".github/workflows/deployments/deployment_template.yaml"
-        sed -i 's;{{NAMESPACE}};${{ secrets.NAMESPACE }};g' ".github/workflows/deployments/deployment_template.yaml"
+        sed -i 's;{{APP_NAME}};${{ inputs.kubernetesAppName }};g' ".github/workflows/deployments/deployment_template.yaml"
+        sed -i 's;{{NAMESPACE}};${{ inputs.kuberntesNamespace }};g' ".github/workflows/deployments/deployment_template.yaml"
         sed -i 's;{{IMAGE}};${{ steps.image_info.outputs.image }};g' ".github/workflows/deployments/deployment_template.yaml"
         cat ".github/workflows/deployments/deployment_template.yaml"
 
@@ -77,4 +85,4 @@ runs:
 
     - name: Check if deployment successful
       timeout-minutes: 2
-      run: kubectl -n ${{ secrets.NAMESPACE }} rollout status deployment ${{ env.KUBERNETES_APP_NAME }}
+      run: kubectl -n ${{ inputs.kuberntesNamespace }} rollout status deployment ${{ inputs.kubernetesAppName }}

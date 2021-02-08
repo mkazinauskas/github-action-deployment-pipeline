@@ -106,7 +106,12 @@ jobs:
       name: test
       url: https://github.com/mkazinauskas/github-actions-deployment-pipeline/test
     steps:
-
+      - name: Deployment to test environment
+        uses: ./.github/workflows/actions/kuberntes-deployment-action.yml
+        with:
+          registryUrl: test
+          username: asdasd
+          password: adasasd
 
   deploy_to_stage:
     name: Deploy application to Stage environment
