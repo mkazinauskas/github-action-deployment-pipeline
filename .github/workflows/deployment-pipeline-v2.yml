@@ -92,10 +92,6 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Save tag to outputs
-        id: step1
-        run: echo "::set-output name=test::hello"
-
   deploy_to_test:
     name: Deploy application to Test environment
     runs-on: ubuntu-20.04
