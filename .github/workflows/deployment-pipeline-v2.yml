@@ -106,12 +106,22 @@ jobs:
       name: test
       url: https://github.com/mkazinauskas/github-actions-deployment-pipeline/test
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
       - name: Deployment to test environment
         uses: ./.github/workflows/actions/kuberntes-deployment-action.yml
         with:
-          registryUrl: test
-          username: asdasd
-          password: adasasd
+          registryUrl: ${{ env.DOCKER_REGISTRY_URL }}
+          registryUsername: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+          registryNamespace: ${{ env.DOCKER_REGISTRY_NAMESPACE }}
+          registryArtifact: ${{ env.DOCKER_REGISTRY_ARTIFACT }}
+          imageVersion: ${{ needs.deploy_to_test.outputs.image_version }}
+          kubectlVersion: ${{ env.KUBERNETES_VERSION }}
+          kuberntesConfig: ${{ env.KUBERNETES_VERSION }}
+          kuberntesNamespace: ${{ secrets.NAMESPACE }}
+          kubernetesAppName: ${{ env.KUBERNETES_APP_NAME }}
 
   deploy_to_stage:
     name: Deploy application to Stage environment

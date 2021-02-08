@@ -5,16 +5,16 @@ inputs:
   registryUrl:
     required: true
     description: 'Docker registry URL'
-  username:
+  registryUsername:
     required: true
-    description: 'Docker login username'
-  password:
+    description: 'Docker registry login username'
+  registryPassword:
     required: true
-    description: 'Docker login password or token'
+    description: 'Docker registry login password or token'
   registryNamespace:
     required: true
     description: 'Namespace where to deploy image'
-  artifact:
+  registryArtifact:
     required: true
     description: 'Docker registry artifact'
   imageVersion:
@@ -37,24 +37,19 @@ inputs:
     description: 'Kubernetes app name'
     default: 'latest'
 
-outputs:
-  dockerImageVersion:
-    description: 'Docker image version'
-    value: ${{ inputs.dockerImageVersion }}
-
 runs:
   using: "composite"
   steps:
     - name: Generate image name
       id: image_info
-      run: echo "::set-output name=image::${{ inputs.registryNamespace }}/${{ inputs.artifact }}:${{ inputs.imageVersion }}"
+      run: echo "::set-output name=image::${{ inputs.registryNamespace }}/${{ inputs.registryArtifact }}:${{ inputs.imageVersion }}"
 
     - name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
         registry: ${{ inputs.registryUrl }}
-        username: ${{ inputs.username }}
-        password: ${{ inputs.password }}
+        username: ${{ inputs.registryUsername }}
+        password: ${{ inputs.registryPassword }}
 
     - name: Check if image exists in registry
       run: docker pull "${{ steps.image_info.outputs.image }}"
