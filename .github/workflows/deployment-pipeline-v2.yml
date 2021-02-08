@@ -106,7 +106,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Deployment to test environment
-        uses: ./.github/workflows/actions/kuberntes-deployment
+        uses: ./.github/workflows/actions/kubernetes-deployment
         with:
           registryUrl: ${{ env.DOCKER_REGISTRY_URL }}
           registryUsername: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
