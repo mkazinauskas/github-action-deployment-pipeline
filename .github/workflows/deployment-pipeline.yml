@@ -9,6 +9,8 @@ env:
   DOCKER_REGISTRY_ARTIFACT: github-actions-deployment-pipeline-app
   KUBERNETES_VERSION: 'latest' # default is latest stable
   KUBERNETES_APP_NAME: github-actions
+  TEST_URL: "https://github.com/mkazinauskas/github-actions-deployment-pipeline/test"
+  STAGE_URL: "https://github.com/mkazinauskas/github-actions-deployment-pipeline/stage"
 
 jobs:
   build_and_publish:
@@ -101,7 +103,7 @@ jobs:
       image_version: ${{ needs.build_and_publish.outputs.image_version }}
     environment:
       name: test
-      url: https://github.com/mkazinauskas/github-actions-deployment-pipeline/test
+      url: ${{ env.TEST_URL }}
     steps:
       - name: Generate image name
         id: image_info
@@ -153,7 +155,7 @@ jobs:
       image_version: ${{ needs.deploy_to_test.outputs.image_version }}
     environment:
       name: stage
-      url: https://github.com/mkazinauskas/github-actions-deployment-pipeline/stage
+      url: ${{ env.STAGE_URL }}
     steps:
       - name: Generate image name
         id: image_info
